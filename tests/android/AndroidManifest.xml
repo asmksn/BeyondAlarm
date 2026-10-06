@@ -1,0 +1,16 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.kibria.dynamicalarm.test">
+    <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="34" />
+    <application android:label="Dynamic Alarm Tests">
+        <activity android:name=".EmailCaptureActivity" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.SENDTO" /><category android:name="android.intent.category.DEFAULT" /><data android:scheme="mailto" /></intent-filter>
+            <intent-filter><action android:name="android.intent.action.SEND" /><action android:name="android.intent.action.SEND_MULTIPLE" /><category android:name="android.intent.category.DEFAULT" /><data android:mimeType="*/*" /></intent-filter>
+        </activity>
+    </application>
+    <instrumentation android:name=".SmokeTest" android:targetPackage="com.kibria.dynamicalarm" android:label="Dynamic Alarm smoke tests" />
+    <instrumentation android:name=".MapSmokeTest" android:targetPackage="com.kibria.dynamicalarm" android:label="Map smoke tests" />
+    <instrumentation android:name=".AttachmentSmokeTest" android:targetPackage="com.kibria.dynamicalarm" android:label="Attachment smoke tests" />
+    <instrumentation android:name=".StoreScreenshots" android:targetPackage="com.kibria.dynamicalarm" android:label="Store screenshots" />
+    <instrumentation android:name=".PromoScreenshots" android:targetPackage="com.kibria.dynamicalarm" android:label="Promotional screenshots" />
+</manifest>
+
+

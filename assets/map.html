@@ -1,0 +1,20 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src https://tile.openstreetmap.org data:;">
+<link rel="stylesheet" href="leaflet.css">
+<style>html,body,#map{height:100%;margin:0;background:#e2f0ed}.leaflet-control-attribution{font-size:11px}.leaflet-container{font-family:sans-serif}</style></head>
+<body><div id="map" role="application" aria-label="Destination map. Search above or tap a point to select it."></div>
+<script src="leaflet.js"></script><script>
+'use strict';
+var map=L.map('map').setView([23.8103,90.4125],11), pin=null;
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+ maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+}).addTo(map).on('tileerror',function(){if(window.AlarmMap)AlarmMap.tileError();});
+function setPoint(lat,lon,label,zoom){
+ if(pin)map.removeLayer(pin);
+ pin=L.circleMarker([lat,lon],{radius:10,color:'#ffffff',weight:3,fillColor:'#087e8b',fillOpacity:1}).addTo(map);
+ if(zoom)map.setView([lat,lon],16);
+ if(window.AlarmMap)AlarmMap.pick(lat,lon,label||'Selected map point');
+}
+map.on('click',function(e){setPoint(e.latlng.lat,e.latlng.lng,'Selected map point',false);});
+</script></body></html>

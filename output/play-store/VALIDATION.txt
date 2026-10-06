@@ -1,0 +1,32 @@
+Dynamic Alarm 1.3 — validation, 5 October 2026
+
+Package: com.kibria.dynamicalarm
+Version code: 4
+Minimum Android: 10 (API 29)
+Target Android: 16 (API 36)
+Production manifest is not debuggable.
+
+Passed:
+- 10 JVM scheduling checks.
+- Signed AAB verified with jarsigner and validated with Google bundletool 1.18.3.
+- Universal APK generated from the delivered AAB and installed on Android 14 emulator.
+- 34 Android runtime checks: exact alarms, foreground alarm service, snooze,
+  recurring/overlapping alarms, recovery, persistence, migration, quotes,
+  home deletion, attachment intents and map coordinate parsing.
+- Map library, live tiles, place search, result selection and confirmation.
+- Email-only attachment chooser, recipient details and two document read
+  grants across app UIDs. No email was sent.
+
+Scope:
+Android 10, 15 and 16 runtime/device tests have not been performed for this
+release. Real-phone sound, vibration, battery restrictions and locked-screen
+behavior must be checked in Play testing. Emulator audio was muted.
+No Google Play upload, pre-launch report, account verification or approval
+has occurred. The policy page must still be published and Play declarations
+completed. This is an upload candidate for internal testing, not a claim of
+Google approval or universal device certification.
+
+The AAB has a dedicated upload signature. The separately supplied APK is
+signed with the existing personal-build certificate to support updates to
+previously shared APKs. Google-generated Play App Signing uses a different
+app signature; see START-HERE.md before switching an existing installation.

@@ -1,0 +1,8 @@
+/build/
+/signing/
+*.apk
+*.aab
+*.idsig
+*.zip
+local.properties
+.gradle/
