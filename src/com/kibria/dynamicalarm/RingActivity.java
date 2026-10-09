@@ -79,7 +79,7 @@ public class RingActivity extends Activity {
     Ui.button(l, Alarm.ACTIONS[alarm.kind], true, () -> unlockAndAct());
     Ui.button(l, "Snooze · 5 minutes", false, () -> stop("snooze"));
     Ui.button(l, "Dismiss", false, () -> stop("dismiss"));
-    l.addView(Ui.text(this, "Your next step, right on time.", 14, Ui.MUTED));
+    l.addView(Ui.text(this, "Your alarm, with a purpose.", 14, Ui.MUTED));
   }
 
   private void unlockAndAct() {

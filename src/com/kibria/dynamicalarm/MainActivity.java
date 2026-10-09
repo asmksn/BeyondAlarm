@@ -5,6 +5,7 @@ import android.app.*;
 import android.content.*;
 import android.content.pm.*;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.*;
@@ -84,6 +85,14 @@ public class MainActivity extends Activity {
     return android.text.format.DateFormat.getTimeFormat(this).format(new Date(at));
   }
 
+  private String alarmTime(Alarm a) {
+    if (a.snoozeAt > 0) return time(a.snoozeAt);
+    Calendar c = Calendar.getInstance();
+    c.set(Calendar.HOUR_OF_DAY, a.hour);
+    c.set(Calendar.MINUTE, a.minute);
+    return android.text.format.DateFormat.getTimeFormat(this).format(c.getTime());
+  }
+
   private String date(long at) {
     return new java.text.SimpleDateFormat("EEE, d MMM yyyy", Locale.getDefault())
         .format(new Date(at));
@@ -116,8 +125,8 @@ public class MainActivity extends Activity {
     draft = null;
     root = Ui.page(this);
     root.addView(Ui.text(this, "A LITTLE REMINDER. A REAL NEXT STEP.", 11, Ui.TEAL));
-    root.addView(Ui.title(this, "Dynamic Alarm", 34));
-    root.addView(Ui.text(this, "Make time for what matters.", 16, Ui.MUTED));
+    root.addView(Ui.title(this, "Alarm Next", 34));
+    root.addView(Ui.text(this, "Your alarm, with a purpose.", 16, Ui.MUTED));
     Ui.gap(root, 16);
     if (!Scheduler.allowed(this) || !notifications() || !fullScreen()) {
       LinearLayout c = Ui.card(root, 0xffffe8ca);
@@ -132,14 +141,18 @@ public class MainActivity extends Activity {
       Ui.button(c, "Open setup", false, () -> setup());
     }
     ArrayList<Alarm> alarms = Store.all(this);
-    alarms.sort(Comparator.comparingLong(a -> a.snoozeAt > 0 ? a.snoozeAt : a.at));
     Alarm next = null;
-    for (Alarm a : alarms)
+    long minUpcoming = Long.MAX_VALUE;
+    for (Alarm a : alarms) {
+      long trigger = a.snoozeAt > 0 ? a.snoozeAt : a.at;
       if ((a.enabled || a.snoozeAt > 0)
-          && (a.snoozeAt > 0 ? a.snoozeAt : a.at) > System.currentTimeMillis()) {
+          && trigger > System.currentTimeMillis()
+          && trigger < minUpcoming) {
+        minUpcoming = trigger;
         next = a;
-        break;
       }
+    }
+    alarms.sort(Comparator.comparingInt((Alarm a) -> a.hour * 60 + a.minute).thenComparingLong(a -> a.at));
     LinearLayout hero = Ui.card(root, Ui.INK);
     hero.addView(
         Ui.text(this, next == null ? "YOUR DAY, WITH INTENTION" : "UP NEXT", 12, 0xff90d6cf));
@@ -198,7 +211,7 @@ public class MainActivity extends Activity {
       LinearLayout card = Ui.card(root, 0xffffffff);
       LinearLayout row = new LinearLayout(this);
       row.setGravity(Gravity.CENTER_VERTICAL);
-      TextView clock = Ui.title(this, time(a.snoozeAt > 0 ? a.snoozeAt : a.at), 32);
+      TextView clock = Ui.title(this, alarmTime(a), 32);
       row.addView(clock, new LinearLayout.LayoutParams(0, -2, 1));
       Switch on = new Switch(this);
       on.setContentDescription("Enable " + a.title);
@@ -249,7 +262,7 @@ public class MainActivity extends Activity {
     Ui.gap(root, 8);
     Ui.button(root, "Setup & test alarm", false, () -> setup());
     Ui.button(root, "Suggestions & feedback", false, () -> feedback());
-    root.addView(Ui.text(this, "Your alarm, with a purpose, by Kibria", 12, Ui.MUTED));
+    root.addView(Ui.text(this, "Alarm Next — Your alarm, with a purpose, by Kibria", 12, Ui.MUTED));
   }
 
   private void setup() {
@@ -329,7 +342,7 @@ public class MainActivity extends Activity {
           }
           Alarm a = new Alarm();
           a.id = Store.newId(this);
-          a.title = "Your Dynamic Alarm test";
+          a.title = "Your Alarm Next test";
           a.at = System.currentTimeMillis() + 15000;
           Calendar t = Calendar.getInstance();
           t.setTimeInMillis(a.at);
@@ -353,30 +366,101 @@ public class MainActivity extends Activity {
           Toast.makeText(this, "Saved schedules checked", 0).show();
           home();
         });
-    Ui.button(
-        root,
-        "Privacy & about",
-        false,
-        () ->
-            new AlertDialog.Builder(this)
-                .setTitle("Dynamic Alarm · 1.3")
-                .setMessage(
-                    "Your alarms stay on this phone. No account, advertising or analytics. Selected"
-                        + " files use Android's document access permission. Weather sends your"
-                        + " entered city to Open-Meteo only when you request the forecast. External"
-                        + " actions open another app, where you confirm calls or sending"
-                        + " messages.\n\n"
-                        + "Your alarm, with a purpose, by Kibria\n\n"
-                        + "Map searches use Photon and map tiles use OpenStreetMap. These services"
-                        + " receive the place you search for or view. Email attachments remain on"
-                        + " your phone until you choose to send them from your email app.\n\n"
-                        + "Suggestions or questions: asmksn@gmail.com\n\n"
-                        + "Weather: Open-Meteo.com (CC BY 4.0); place data: GeoNames. Maps: ©"
-                        + " OpenStreetMap contributors (ODbL), Leaflet (BSD-2-Clause).")
-                .setNegativeButton("Privacy policy", (d, w) -> startActivity(new Intent(this, PrivacyActivity.class)))
-                .setNeutralButton("Email feedback", (d, w) -> feedback())
-                .setPositiveButton("Close", null)
-                .show());
+    Ui.button(root, "Privacy & about", false, () -> showPrivacyAboutDialog());
+  }
+
+  private void showPrivacyAboutDialog() {
+    ScrollView scroll = new ScrollView(this);
+    scroll.setFillViewport(true);
+    LinearLayout layout = Ui.column(this);
+    int padH = Ui.dp(this, 16);
+    int padV = Ui.dp(this, 20);
+    layout.setPadding(padH, padV, padH, padV);
+    scroll.addView(layout);
+
+    layout.addView(Ui.title(this, "Alarm Next · 2.0", 22));
+    Ui.gap(layout, 12);
+
+    String body =
+        "Your alarms stay on this phone. No account, advertising or analytics. Selected"
+            + " files use Android's document access permission. Weather sends your"
+            + " entered city to Open-Meteo only when you request the forecast. External"
+            + " actions open another app, where you confirm calls or sending messages.\n\n"
+            + "Alarm Next — Your alarm, with a purpose, by Kibria\n\n"
+            + "Map searches use Photon and map tiles use OpenStreetMap. These services"
+            + " receive the place you search for or view. Email attachments remain on"
+            + " your phone until you choose to send them from your email app.\n\n"
+            + "Suggestions or questions: asmksn@gmail.com\n\n"
+            + "Weather: Open-Meteo (CC BY 4.0) | Places: GeoNames | Maps: © OpenStreetMap contributors (ODbL)";
+
+    TextView tv = Ui.text(this, body, 14, Ui.INK);
+    tv.setLineSpacing(Ui.dp(this, 2), 1.25f);
+    layout.addView(tv);
+
+    Ui.gap(layout, 18);
+
+    LinearLayout bar = new LinearLayout(this);
+    bar.setOrientation(LinearLayout.HORIZONTAL);
+    bar.setGravity(Gravity.CENTER);
+    bar.setPadding(0, Ui.dp(this, 8), 0, Ui.dp(this, 4));
+
+    AlertDialog dialog = new AlertDialog.Builder(this)
+        .setView(scroll)
+        .create();
+
+    TextView opt1 = new TextView(this);
+    opt1.setText("Privacy policy");
+    opt1.setTextSize(13);
+    opt1.setTextColor(Ui.TEAL);
+    opt1.setSingleLine(true);
+    opt1.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+    opt1.setPadding(Ui.dp(this, 2), Ui.dp(this, 6), Ui.dp(this, 2), Ui.dp(this, 6));
+    opt1.setOnClickListener(v -> {
+      dialog.dismiss();
+      startActivity(new Intent(this, PrivacyActivity.class));
+    });
+    bar.addView(opt1);
+
+    TextView sep1 = new TextView(this);
+    sep1.setText(" | ");
+    sep1.setTextSize(13);
+    sep1.setTextColor(Ui.MUTED);
+    sep1.setSingleLine(true);
+    bar.addView(sep1);
+
+    TextView opt2 = new TextView(this);
+    opt2.setText("Email feedback");
+    opt2.setTextSize(13);
+    opt2.setTextColor(Ui.TEAL);
+    opt2.setSingleLine(true);
+    opt2.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+    opt2.setPadding(Ui.dp(this, 2), Ui.dp(this, 6), Ui.dp(this, 2), Ui.dp(this, 6));
+    opt2.setOnClickListener(v -> {
+      dialog.dismiss();
+      feedback();
+    });
+    bar.addView(opt2);
+
+    TextView sep2 = new TextView(this);
+    sep2.setText(" | ");
+    sep2.setTextSize(13);
+    sep2.setTextColor(Ui.MUTED);
+    sep2.setSingleLine(true);
+    bar.addView(sep2);
+
+    TextView opt3 = new TextView(this);
+    opt3.setText("Close");
+    opt3.setTextSize(13);
+    opt3.setTextColor(Ui.TEAL);
+    opt3.setSingleLine(true);
+    opt3.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+    opt3.setPadding(Ui.dp(this, 2), Ui.dp(this, 6), Ui.dp(this, 2), Ui.dp(this, 6));
+    opt3.setOnClickListener(v -> dialog.dismiss());
+    bar.addView(opt3);
+
+    layout.addView(bar);
+
+    dialog.show();
   }
 
   private void permissionCard(String title, boolean ready, String desc, Runnable action) {
@@ -599,17 +683,7 @@ public class MainActivity extends Activity {
           actionFields,
           "Choose a quote",
           false,
-          () ->
-              new AlertDialog.Builder(this)
-                  .setTitle("A thought to wake up to")
-                  .setItems(
-                      Quotes.LABELS,
-                      (d, which) -> {
-                        draft.quote = Quotes.TEXT[which];
-                        quote.setText(draft.quote);
-                      })
-                  .setNegativeButton("Cancel", null)
-                  .show());
+          () -> showQuoteCategories());
       quote =
           Ui.field(
               actionFields,
@@ -744,6 +818,90 @@ public class MainActivity extends Activity {
               Ui.MUTED));
   }
 
+  private void showQuoteCategories() {
+    String[] items = Quotes.categoryNames();
+    ArrayAdapter<String> adapter =
+        new ArrayAdapter<String>(this, 0, items) {
+          @Override
+          public View getView(int position, View convertView, ViewGroup parent) {
+            TextView tv;
+            if (convertView instanceof TextView) {
+              tv = (TextView) convertView;
+            } else {
+              tv = new TextView(getContext());
+              tv.setTextSize(16);
+              tv.setTextColor(Ui.INK);
+              int hPad = Ui.dp(getContext(), 18);
+              int vPad = Ui.dp(getContext(), 15);
+              tv.setPadding(hPad, vPad, hPad, vPad);
+            }
+            tv.setText(getItem(position));
+            if (position == items.length - 1) {
+              tv.setTextColor(0xffc0392b);
+              tv.setBackgroundColor(0xfffff0f0);
+            } else {
+              tv.setTextColor(Ui.INK);
+              int bg = (position % 2 == 0) ? 0xffeaf4f3 : 0xfffff7ec;
+              tv.setBackgroundColor(bg);
+            }
+            return tv;
+          }
+        };
+
+    new AlertDialog.Builder(this)
+        .setTitle("Choose a category")
+        .setAdapter(
+            adapter,
+            (d, which) -> {
+              if (which >= Quotes.CATEGORIES.length) {
+                draft.quote = "";
+                if (quote != null) quote.setText("");
+              } else {
+                showQuotesInCategory(Quotes.CATEGORIES[which]);
+              }
+            })
+        .setNegativeButton("Cancel", null)
+        .show();
+  }
+
+  private void showQuotesInCategory(Quotes.Category cat) {
+    ArrayAdapter<String> adapter =
+        new ArrayAdapter<String>(this, 0, cat.quotes) {
+          @Override
+          public View getView(int position, View convertView, ViewGroup parent) {
+            TextView tv;
+            if (convertView instanceof TextView) {
+              tv = (TextView) convertView;
+            } else {
+              tv = new TextView(getContext());
+              tv.setTextSize(15);
+              tv.setTextColor(Ui.INK);
+              tv.setLineSpacing(Ui.dp(getContext(), 2), 1.25f);
+              int hPad = Ui.dp(getContext(), 18);
+              int vPad = Ui.dp(getContext(), 14);
+              tv.setPadding(hPad, vPad, hPad, vPad);
+            }
+            tv.setText(getItem(position));
+            tv.setTextColor(Ui.INK);
+            int bg = (position % 2 == 0) ? 0xffeaf4f3 : 0xfffff7ec;
+            tv.setBackgroundColor(bg);
+            return tv;
+          }
+        };
+
+    new AlertDialog.Builder(this)
+        .setTitle(cat.name)
+        .setAdapter(
+            adapter,
+            (d, which) -> {
+              draft.quote = cat.quotes[which];
+              if (quote != null) quote.setText(draft.quote);
+            })
+        .setNeutralButton("‹ Back", (d, which) -> showQuoteCategories())
+        .setNegativeButton("Cancel", null)
+        .show();
+  }
+
   private void pickContact(boolean email) {
     try {
       startActivityForResult(
@@ -779,9 +937,9 @@ public class MainActivity extends Activity {
       startActivity(
           new Intent(
                   Intent.ACTION_SENDTO,
-                  Uri.parse("mailto:asmksn@gmail.com?subject=Dynamic%20Alarm%20feedback"))
+                  Uri.parse("mailto:asmksn@gmail.com?subject=Alarm%20Next%20feedback"))
               .putExtra(Intent.EXTRA_EMAIL, new String[] {"asmksn@gmail.com"})
-              .putExtra(Intent.EXTRA_SUBJECT, "Dynamic Alarm feedback"));
+              .putExtra(Intent.EXTRA_SUBJECT, "Alarm Next feedback"));
     } catch (ActivityNotFoundException e) {
       new AlertDialog.Builder(this)
           .setTitle("Suggestions & feedback")

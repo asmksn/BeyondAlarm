@@ -1,4 +1,4 @@
-param([string]$Sdk = (Join-Path $PSScriptRoot '..\.tools\android-sdk'))
+param([string]$Sdk = (if (Test-Path 'D:\KS\App idea\.tools\android-sdk') { 'D:\KS\App idea\.tools\android-sdk' } else { Join-Path $PSScriptRoot '..\.tools\android-sdk' }))
 $ErrorActionPreference = 'Stop'
 $sdkPath = [IO.Path]::GetFullPath($Sdk)
 $buildTools = Join-Path $sdkPath 'build-tools\35.0.0'
@@ -25,17 +25,25 @@ Check-Exit
 Check-Exit
 $key = "$PSScriptRoot\signing\personal-build.jks"
 if (-not (Test-Path $key)) {
-    & "$javaBin\keytool.exe" -genkeypair -keystore $key -storepass android -keypass android -alias dynamic-alarm -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=Dynamic Alarm Personal Build, O=Personal, C=BD'
+    & "$javaBin\keytool.exe" -genkeypair -keystore $key -storepass android -keypass android -alias alarm-next -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=Alarm Next Personal Build, O=Personal, C=BD'
     Check-Exit
 }
-& "$buildTools\apksigner.bat" sign --ks $key --ks-key-alias dynamic-alarm --ks-pass pass:android --key-pass pass:android --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --out "$PSScriptRoot\output\Dynamic-Alarm-1.3.apk" "$build\aligned.apk"
+$alias = if (Test-Path $key) { 'alarm-next' } else { 'dynamic-alarm' }
+# Check alias in keystore
+$aliasList = & "$javaBin\keytool.exe" -list -keystore $key -storepass android
+$signingAlias = if ($aliasList -match 'alarm-next') { 'alarm-next' } else { 'dynamic-alarm' }
+
+$outApk = "$PSScriptRoot\output\Alarm-Next-Universal-2.0.apk"
+& "$buildTools\apksigner.bat" sign --ks $key --ks-key-alias $signingAlias --ks-pass pass:android --key-pass pass:android --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --out $outApk "$build\aligned.apk"
 Check-Exit
-& "$buildTools\apksigner.bat" verify --verbose "$PSScriptRoot\output\Dynamic-Alarm-1.3.apk"
+& "$buildTools\apksigner.bat" verify --verbose $outApk
 Check-Exit
 & "$javaBin\javac.exe" -encoding UTF-8 -d "$build\tests" "$PSScriptRoot\src\com\kibria\dynamicalarm\Times.java" "$PSScriptRoot\tests\TimesTest.java"
 Check-Exit
 & "$javaBin\java.exe" -cp "$build\tests" TimesTest
 Check-Exit
-Get-FileHash "$PSScriptRoot\output\Dynamic-Alarm-1.3.apk" -Algorithm SHA256
+Copy-Item $outApk (Join-Path $PSScriptRoot "..\Alarm-Next-Universal-2.0.apk") -Force -ErrorAction SilentlyContinue
+Get-FileHash $outApk -Algorithm SHA256
+
 
 
