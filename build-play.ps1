@@ -1,9 +1,9 @@
-param([string]$Sdk = (Join-Path $PSScriptRoot '..\.tools\android-sdk'))
+param([string]$Sdk = $(if (Test-Path 'D:\KS\App idea\.tools\android-sdk') { 'D:\KS\App idea\.tools\android-sdk' } else { Join-Path $PSScriptRoot '..\.tools\android-sdk' }))
 $ErrorActionPreference = 'Stop'
 & "$PSScriptRoot\build.ps1" -Sdk $Sdk
 if ($LASTEXITCODE -ne 0) { throw 'APK compilation failed' }
 $javaBin = Split-Path (Get-Command java.exe).Source
-$tools = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\.tools'))
+$tools = if (Test-Path 'D:\KS\App idea\.tools') { 'D:\KS\App idea\.tools' } else { [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\.tools')) }
 $build = "$PSScriptRoot\build"
 $release = "$PSScriptRoot\output\play-store"
 New-Item -ItemType Directory -Force $release | Out-Null
@@ -25,7 +25,7 @@ try {
   }
   [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($outputZip, "$build\dex\classes.dex", 'dex/classes.dex') | Out-Null
 } finally { $inputZip.Dispose(); $outputZip.Dispose() }
-$aab = "$release\Dynamic-Alarm-1.3.aab"
+$aab = "$release\Beyond-Alarm-Universal-2.0.aab"
 & java -jar "$tools\bundletool.jar" build-bundle --modules=$module --output=$aab --overwrite
 Check
 $key = "$PSScriptRoot\signing\play-upload.p12"
@@ -35,7 +35,7 @@ if (-not (Test-Path $key)) {
   $bytes = New-Object byte[] 32
   [Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
   [IO.File]::WriteAllText($password, [Convert]::ToBase64String($bytes))
-  & "$javaBin\keytool.exe" -genkeypair -keystore $key -storetype PKCS12 -storepass:file $password -keypass:file $password -alias play-upload -keyalg RSA -keysize 3072 -validity 10000 -dname 'CN=Kibria, OU=Dynamic Alarm, C=BD'
+  & "$javaBin\keytool.exe" -genkeypair -keystore $key -storetype PKCS12 -storepass:file $password -keypass:file $password -alias play-upload -keyalg RSA -keysize 3072 -validity 10000 -dname 'CN=Kibria, OU=Beyond Alarm, C=BD'
   Check
 }
 & "$javaBin\jarsigner.exe" -keystore $key -storepass:file $password -digestalg SHA-256 -sigalg SHA256withRSA $aab play-upload
@@ -46,4 +46,18 @@ Check
 Check
 & java -jar "$tools\bundletool.jar" dump manifest --bundle=$aab | Set-Content "$release\bundle-manifest.xml"
 Check
+
+# Copy bundle and assets to D:\KS\Beyond Alarm\GPlayStore
+$gplay = "D:\KS\Beyond Alarm\GPlayStore"
+New-Item -ItemType Directory -Force $gplay | Out-Null
+Copy-Item $aab (Join-Path $gplay "Beyond-Alarm-Universal-2.0.aab") -Force
+Copy-Item "$release\icon-512.png" (Join-Path $gplay "icon-512.png") -Force -ErrorAction SilentlyContinue
+Copy-Item "$release\feature-graphic-1024x500.png" (Join-Path $gplay "feature-graphic-1024x500.png") -Force -ErrorAction SilentlyContinue
+Copy-Item "$release\privacy-policy.html" (Join-Path $gplay "privacy-policy.html") -Force -ErrorAction SilentlyContinue
+Copy-Item "$release\store-listing.txt" (Join-Path $gplay "store-listing.txt") -Force -ErrorAction SilentlyContinue
+if (Test-Path "$release\screenshots") {
+  Copy-Item "$release\screenshots" $gplay -Recurse -Force
+}
+
 Get-FileHash $aab -Algorithm SHA256 | Format-List
+Write-Host "Play Store Kit and AAB Bundle created successfully in $gplay"

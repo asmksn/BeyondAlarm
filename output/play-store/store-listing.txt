@@ -1,4 +1,4 @@
-APP NAME
+﻿APP NAME
 Beyond Alarm
 
 SHORT DESCRIPTION
