@@ -68,7 +68,26 @@ public class RingActivity extends Activity {
     l.addView(Ui.title(this, alarm.title, 30));
     Ui.gap(l, 22);
     LinearLayout card = Ui.card(l, 0xffffffff);
-    card.addView(Ui.text(this, Alarm.KINDS[alarm.kind], 14, Ui.TEAL));
+    LinearLayout kindBadge = new LinearLayout(this);
+    kindBadge.setOrientation(LinearLayout.HORIZONTAL);
+    kindBadge.setGravity(Gravity.CENTER_VERTICAL);
+    kindBadge.setBackground(ActionTheme.cardBg(alarm.kind, 999, this));
+    kindBadge.setPadding(Ui.dp(this, 12), Ui.dp(this, 6), Ui.dp(this, 12), Ui.dp(this, 6));
+
+    ImageView badgeIcon = new ImageView(this);
+    badgeIcon.setImageDrawable(ActionTheme.getIcon(this, alarm.kind, ActionTheme.ACCENTS[alarm.kind]));
+    kindBadge.addView(badgeIcon, new LinearLayout.LayoutParams(Ui.dp(this, 18), Ui.dp(this, 18)));
+
+    TextView badgeText = new TextView(this);
+    badgeText.setText("  " + Alarm.KINDS[alarm.kind]);
+    badgeText.setTextSize(14);
+    badgeText.setTextColor(ActionTheme.ACCENTS[alarm.kind]);
+    badgeText.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
+    kindBadge.addView(badgeText);
+
+    
+
+    card.addView(kindBadge, new LinearLayout.LayoutParams(-2, -2));
     String detail = alarm.targetName.isEmpty() ? alarm.target : alarm.targetName;
     if (alarm.kind == 0) detail = alarm.quote;
     if (!detail.isEmpty()) card.addView(Ui.title(this, detail, 22));

@@ -1,7 +1,7 @@
-Alarm Next — Privacy Policy
+Beyond Alarm — Privacy Policy
 Effective date: 5 October 2026
 
-Alarm Next is provided by Kibria. Questions and privacy requests: asmksn@gmail.com.
+Beyond Alarm is provided by Kibria. Questions and privacy requests: asmksn@gmail.com.
 
 Information on your phone
 Alarm times, titles, quotes, selected destinations, message drafts, recipient details, and references to files you select are stored locally in the app. The app does not require an account and includes no advertising or analytics SDKs. It does not operate a developer-owned server. It does not access your GPS location. Android's pickers let you choose individual documents, contacts and ringtones. Installed launchable apps are listed locally only when you choose an app action.
@@ -10,13 +10,13 @@ Optional online features
 Searching the map sends your entered search text to Photon (photon.komoot.io). Viewing a map requests tiles from OpenStreetMap (tile.openstreetmap.org); those requests identify the viewed map area. Requesting weather sends your entered city to Open-Meteo's geocoding service and the selected city's coordinates to its forecast service. These services receive your IP address and normal network request information and may keep server logs under their own policies. Requests use HTTPS. A searched or viewed place is not necessarily your current location. Map search results are cached locally for up to seven days and may remain stored until replaced or app data is cleared. Online features require an internet connection.
 
 External actions and attachments
-Calls, messages, emails, navigation, web pages and document actions open apps you choose. Information needed for the action, including recipient details, drafted messages, selected files or destinations, is passed to that app when you request the action. Alarm Next does not automatically send emails or messages. Confirm sending in the external app. Its provider's privacy practices then apply. Email attachments are accessed through permissions granted by Android's document picker.
+Calls, messages, emails, navigation, web pages and document actions open apps you choose. Information needed for the action, including recipient details, drafted messages, selected files or destinations, is passed to that app when you request the action. Beyond Alarm does not automatically send emails or messages. Confirm sending in the external app. Its provider's privacy practices then apply. Email attachments are accessed through permissions granted by Android's document picker.
 
 Alarm permissions
 Notifications, exact alarms, full-screen alarm access, vibration and a foreground audio service support alarms you set. Reboot access restores schedules. These permissions do not upload alarm information. Titles and quotes may appear on the lock screen; control notification visibility in Android settings.
 
 Retention and deletion
-Delete an alarm from the home screen to remove its saved settings. Clearing Alarm Next's app storage or uninstalling removes its local app data, including saved alarms and cached searches. Original selected files and copies already sent through another app are not deleted. If you email support, your email address, message and attachments reach the support mailbox and may be retained to handle your request; email asmksn@gmail.com to request deletion of support correspondence. We cannot delete data held by independent services; contact those services directly.
+Delete an alarm from the home screen to remove its saved settings. Clearing Beyond Alarm's app storage or uninstalling removes its local app data, including saved alarms and cached searches. Original selected files and copies already sent through another app are not deleted. If you email support, your email address, message and attachments reach the support mailbox and may be retained to handle your request; email asmksn@gmail.com to request deletion of support correspondence. We cannot delete data held by independent services; contact those services directly.
 
 Service policies
 OpenStreetMap: https://osmfoundation.org/wiki/Privacy_Policy

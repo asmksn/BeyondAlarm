@@ -125,7 +125,7 @@ public class MainActivity extends Activity {
     draft = null;
     root = Ui.page(this);
     root.addView(Ui.text(this, "A LITTLE REMINDER. A REAL NEXT STEP.", 11, Ui.TEAL));
-    root.addView(Ui.title(this, "Alarm Next", 34));
+    root.addView(Ui.title(this, "Beyond Alarm", 34));
     root.addView(Ui.text(this, "Your alarm, with a purpose.", 16, Ui.MUTED));
     Ui.gap(root, 16);
     if (!Scheduler.allowed(this) || !notifications() || !fullScreen()) {
@@ -218,26 +218,85 @@ public class MainActivity extends Activity {
       on.setChecked(a.enabled || a.snoozeAt > 0);
       row.addView(on);
       card.addView(row);
-      card.addView(Ui.title(this, a.title, 19));
-      card.addView(
-          Ui.text(
-              this,
-              Alarm.KINDS[a.kind]
-                  + " · "
-                  + repeat(a.days)
-                  + (a.days == 0 ? " · " + date(a.at) : "")
-                  + (a.snoozeAt > 0 ? " · Snoozed" : ""),
-              13,
-              Ui.MUTED));
-      Ui.button(
-          card,
-          "Edit alarm",
-          false,
-          () -> {
-            chosenDate = a.at;
-            editor(Alarm.from(a.json()));
-          });
-      Ui.button(card, "Delete alarm", false, () -> deleteAlarm(a));
+      if (!a.title.isEmpty() && !a.title.equals(Alarm.KINDS[a.kind])) {
+        card.addView(Ui.title(this, a.title, 19));
+      }
+
+      LinearLayout infoCol = new LinearLayout(this);
+      infoCol.setOrientation(LinearLayout.VERTICAL);
+      infoCol.setPadding(0, Ui.dp(this, 4), 0, Ui.dp(this, 4));
+
+      LinearLayout kindBadge = new LinearLayout(this);
+      kindBadge.setOrientation(LinearLayout.HORIZONTAL);
+      kindBadge.setGravity(Gravity.CENTER_VERTICAL);
+      kindBadge.setBackground(ActionTheme.cardBg(a.kind, 999, this));
+      kindBadge.setPadding(Ui.dp(this, 12), Ui.dp(this, 5), Ui.dp(this, 12), Ui.dp(this, 5));
+
+      ImageView bIcon = new ImageView(this);
+      bIcon.setImageDrawable(ActionTheme.getIcon(this, a.kind, ActionTheme.ACCENTS[a.kind]));
+      kindBadge.addView(bIcon, new LinearLayout.LayoutParams(Ui.dp(this, 16), Ui.dp(this, 16)));
+
+      TextView bText = new TextView(this);
+      bText.setText("  " + Alarm.KINDS[a.kind]);
+      bText.setTextSize(13);
+      bText.setTextColor(ActionTheme.ACCENTS[a.kind]);
+      bText.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+      kindBadge.addView(bText);
+
+      LinearLayout.LayoutParams badgeLp = new LinearLayout.LayoutParams(-2, -2);
+      badgeLp.bottomMargin = Ui.dp(this, 6);
+      infoCol.addView(kindBadge, badgeLp);
+
+      String sched = repeat(a.days)
+          + (a.days == 0 ? " • " + date(a.at) : "")
+          + (a.snoozeAt > 0 ? " • Snoozed" : "");
+      TextView schedView = new TextView(this);
+      schedView.setText(sched);
+      schedView.setTextSize(13);
+      schedView.setTextColor(a.snoozeAt > 0 ? ActionTheme.ACCENTS[ActionTheme.KIND_MESSAGE] : Ui.MUTED);
+      schedView.setPadding(Ui.dp(this, 2), 0, 0, Ui.dp(this, 4));
+      infoCol.addView(schedView);
+
+      card.addView(infoCol);
+
+      // Side-by-side Edit and Delete buttons on one line for a shorter, cleaner card
+      LinearLayout btnRow = new LinearLayout(this);
+      btnRow.setOrientation(LinearLayout.HORIZONTAL);
+      btnRow.setGravity(Gravity.CENTER_VERTICAL);
+      LinearLayout.LayoutParams btnRowLp = new LinearLayout.LayoutParams(-1, -2);
+      btnRowLp.topMargin = Ui.dp(this, 8);
+      btnRowLp.bottomMargin = Ui.dp(this, 2);
+
+      Button editBtn = new Button(this);
+      editBtn.setText("Edit alarm");
+      editBtn.setAllCaps(false);
+      editBtn.setTextSize(15);
+      editBtn.setTextColor(Ui.TEAL);
+      editBtn.setBackground(Ui.bg(Ui.PALE, Ui.dp(this, 14)));
+      editBtn.setPadding(Ui.dp(this, 10), Ui.dp(this, 8), Ui.dp(this, 10), Ui.dp(this, 8));
+      editBtn.setMinHeight(Ui.dp(this, 44));
+      editBtn.setOnClickListener(v -> {
+        chosenDate = a.at;
+        editor(Alarm.from(a.json()));
+      });
+      LinearLayout.LayoutParams editLp = new LinearLayout.LayoutParams(0, -2, 1.0f);
+      editLp.rightMargin = Ui.dp(this, 6);
+      btnRow.addView(editBtn, editLp);
+
+      Button delBtn = new Button(this);
+      delBtn.setText("Delete alarm");
+      delBtn.setAllCaps(false);
+      delBtn.setTextSize(15);
+      delBtn.setTextColor(Ui.MUTED);
+      delBtn.setBackground(Ui.bg(0xffeef2f5, Ui.dp(this, 14)));
+      delBtn.setPadding(Ui.dp(this, 10), Ui.dp(this, 8), Ui.dp(this, 10), Ui.dp(this, 8));
+      delBtn.setMinHeight(Ui.dp(this, 44));
+      delBtn.setOnClickListener(v -> deleteAlarm(a));
+      LinearLayout.LayoutParams delLp = new LinearLayout.LayoutParams(0, -2, 1.0f);
+      delLp.leftMargin = Ui.dp(this, 6);
+      btnRow.addView(delBtn, delLp);
+
+      card.addView(btnRow, btnRowLp);
       on.setOnCheckedChangeListener(
           (b, checked) -> {
             if (checked && (!Scheduler.allowed(this) || !notifications())) {
@@ -262,7 +321,7 @@ public class MainActivity extends Activity {
     Ui.gap(root, 8);
     Ui.button(root, "Setup & test alarm", false, () -> setup());
     Ui.button(root, "Suggestions & feedback", false, () -> feedback());
-    root.addView(Ui.text(this, "Alarm Next — Your alarm, with a purpose, by Kibria", 12, Ui.MUTED));
+    root.addView(Ui.text(this, "Beyond Alarm — Your alarm, with a purpose, by Kibria", 12, Ui.MUTED));
   }
 
   private void setup() {
@@ -342,7 +401,7 @@ public class MainActivity extends Activity {
           }
           Alarm a = new Alarm();
           a.id = Store.newId(this);
-          a.title = "Your Alarm Next test";
+          a.title = "Your Beyond Alarm test";
           a.at = System.currentTimeMillis() + 15000;
           Calendar t = Calendar.getInstance();
           t.setTimeInMillis(a.at);
@@ -378,7 +437,7 @@ public class MainActivity extends Activity {
     layout.setPadding(padH, padV, padH, padV);
     scroll.addView(layout);
 
-    layout.addView(Ui.title(this, "Alarm Next · 2.0", 22));
+    layout.addView(Ui.title(this, "Beyond Alarm • 2.0", 22));
     Ui.gap(layout, 12);
 
     String body =
@@ -386,7 +445,7 @@ public class MainActivity extends Activity {
             + " files use Android's document access permission. Weather sends your"
             + " entered city to Open-Meteo only when you request the forecast. External"
             + " actions open another app, where you confirm calls or sending messages.\n\n"
-            + "Alarm Next — Your alarm, with a purpose, by Kibria\n\n"
+            + "Beyond Alarm — Your alarm, with a purpose, by Kibria\n\n"
             + "Map searches use Photon and map tiles use OpenStreetMap. These services"
             + " receive the place you search for or view. Email attachments remain on"
             + " your phone until you choose to send them from your email app.\n\n"
@@ -572,13 +631,17 @@ public class MainActivity extends Activity {
             12,
             Ui.MUTED));
     Ui.gap(root, 12);
+    Ui.gap(root, 12);
     root.addView(Ui.title(this, "When it rings…", 23));
+    Ui.gap(root, 6);
     Spinner kinds = new Spinner(this);
-    ArrayAdapter<String> adapter =
-        new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, Alarm.KINDS);
-    kinds.setAdapter(adapter);
+    kinds.setBackground(null);
+    BaseAdapter kindAdapter = ActionTheme.createAdapter(this, () -> draft.kind);
+    kinds.setAdapter(kindAdapter);
     kinds.setSelection(a.kind);
-    root.addView(kinds, new LinearLayout.LayoutParams(-1, Ui.dp(this, 56)));
+    LinearLayout.LayoutParams kindLp = new LinearLayout.LayoutParams(-1, -2);
+    kindLp.bottomMargin = Ui.dp(this, 12);
+    root.addView(kinds, kindLp);
     actionFields = Ui.column(this);
     root.addView(actionFields);
     fields();
@@ -594,6 +657,7 @@ public class MainActivity extends Activity {
               draft.body = "";
               draft.subject = "";
               draft.mime = "";
+              kindAdapter.notifyDataSetChanged();
               fields();
             }
           }
@@ -937,9 +1001,9 @@ public class MainActivity extends Activity {
       startActivity(
           new Intent(
                   Intent.ACTION_SENDTO,
-                  Uri.parse("mailto:asmksn@gmail.com?subject=Alarm%20Next%20feedback"))
+                  Uri.parse("mailto:asmksn@gmail.com?subject=Beyond%20Alarm%20feedback"))
               .putExtra(Intent.EXTRA_EMAIL, new String[] {"asmksn@gmail.com"})
-              .putExtra(Intent.EXTRA_SUBJECT, "Alarm Next feedback"));
+              .putExtra(Intent.EXTRA_SUBJECT, "Beyond Alarm feedback"));
     } catch (ActivityNotFoundException e) {
       new AlertDialog.Builder(this)
           .setTitle("Suggestions & feedback")
@@ -1186,4 +1250,3 @@ public class MainActivity extends Activity {
     }
   }
 }
-

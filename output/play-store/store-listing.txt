@@ -1,5 +1,5 @@
 APP NAME
-Dynamic Alarm
+Beyond Alarm
 
 SHORT DESCRIPTION
 Set alarms with quotes, directions, email drafts and everyday actions.
@@ -7,7 +7,7 @@ Set alarms with quotes, directions, email drafts and everyday actions.
 FULL DESCRIPTION
 Your alarm, with a purpose, by Kibria.
 
-Plan a reminder and choose what comes next. Dynamic Alarm combines scheduled alarms with useful actions you can open when it is time.
+Plan a reminder and choose what comes next. Beyond Alarm combines scheduled alarms with useful actions you can open when it is time.
 
 • Set one-time or repeating alarms, choose a ringtone and adjust vibration.
 • Add an uplifting quote, choose a morning or Fajr quote, or write your own.
@@ -25,5 +25,5 @@ Allow notifications, alarms and full-screen alarm access in Setup for the intend
 For Android 10 and above.
 Suggestions or questions: asmksn@gmail.com
 
-RELEASE NOTES — 1.3
-Alarm deletion, searchable map destinations, selectable and custom quotes, and email attachments. Updated Android compatibility and an in-app privacy policy.
+RELEASE NOTES — 2.0
+Brand new Beyond Alarm experience with vibrant action badges, new icon design, customizable actions, searchable map destinations, and email attachments.
