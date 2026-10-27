@@ -1,6 +1,8 @@
 /build/
 /signing/
 *.apk
+!Beyond-Alarm-Universal-2.0.apk
+!output/Beyond-Alarm-Universal-2.0.apk
 *.aab
 *.idsig
 *.zip
